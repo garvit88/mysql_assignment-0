@@ -1,0 +1,185 @@
+create database - create database management_app;
+
+create user table -  create table user(user_id int primary key AUTO_INCREMENT, user_name varchar(50) NOT NULL, user_added_date date NOT NULL, user_password varchar(50) NOT NULL, user_mobile int NOT NULL);
+
+create note table - create table note(note_id int primary key AUTO_INCREMENT, note_title varchar(100), note_content varchar(400) NOT NULL, note_status varchar(100) NOT NULL, note_creation_date date NOT NULL);
+
+create category table - create table category(category_id int primary key AUTO_INCREMENT, category_name varchar(100) NOT NULL, category_descr varchar(100) NOT NULL, category_creation_date date NOT NULL, category_creator varchar(100) NOT NULL);
+
+create reminder table - create table reminder(reminder_id int primary key AUTO_INCREMENT, reminder_name varchar(100) NOT NULL, reminder_descr varchar(200), reminder_type varchar(100), reminder_creation_date date NOT NULL, reminder_creator varchar(100) NOT NULL);
+
+create user_note table - create table user_note(note_id int, user_id int, FOREIGN KEY(note_id) REFERENCES note(note_id), FOREIGN KEY(user_id) REFERENCES user(user_id));
+
+create note_reminder table - create table note_reminder(note_id int, reminder_id int, FOREIGN KEY(note_id) REFERENCES note(note_id), FOREIGN KEY(reminder_id) REFERENCES reminder(reminder_id));
+
+create note_category table - create table note_category(note_id int, category_id int, FOREIGN KEY(note_id) REFERENCES note(note_id), FOREIGN KEY(category_id) REFERENCES category(category_id));
+
+insert into user - 
+insert into user values(1,"Garvit","2018-05-05","abc",1234567890);
+insert into user values(2,"someone","2017-01-20","abc123",1345267890);
+insert into user values(3,"newuser","2018-07-02","pass123",1452678900);
+
+insert into note - 
+insert into note values(1,"title1","This is content of note1","Created","2018-06-29");
+insert into note values(2,"title-again","This is some content","Created","2018-06-29");
+insert into note values(3,"title-something","new content of note3","Created","2018-07-02");
+
+insert into category - 
+insert into category values(2,"Miscellaneous","this contains miscellaneous things","2018-06-29","Garvit");
+insert into category values(2,"Miscellaneous","this contains miscellaneous things","2018-06-29","Garvit");
+insert into category values(3,"Miscellaneous","this contains miscellaneous things","2018-07-01","Someone");
+
+insert into reminder - 
+insert into reminder values(1,"reminder-1","remind me everyday","everyday","2018-06-29","Garvit");
+insert into reminder values(2,"reminder-2","remind me everyweek","everyweek","2018-06-29","Garvit");
+insert into reminder values(3,"reminder-1","remind me everyweek","everyweek","2018-06-30","someone");
+
+insert into user_note - 
+insert into user_note values(1,1);
+insert into user_note values(2,1);
+insert into user_note values(3,2);
+
+insert into note_reminder - 
+insert into note_reminder values(1,1);
+insert into note_reminder values(2,2);
+insert into note_reminder values(3,3);
+
+insert into note_category - 
+insert into note_category values(1,1);
+insert into note_category values(2,2);
+insert into note_category values(3,3);
+
+
+Q - Fetch the row from User table based on Id and Password.
+select * from user where user_name = 'Garvit' and user_password = 'abc';
+
++---------+-----------+-----------------+---------------+-------------+
+| user_id | user_name | user_added_date | user_password | user_mobile |
++---------+-----------+-----------------+---------------+-------------+
+|       1 | Garvit    | 2018-05-05      | abc           |  1234567890 |
++---------+-----------+-----------------+---------------+-------------+
+
+
+Q - Fetch all the rows from Note table based on the field note_creation_date.
+select * from note where note_creation_date = "2018-06-29";
+
++---------+-------------+--------------------------+-------------+--------------------+
+| note_id | note_title  | note_content             | note_status | note_creation_date |
++---------+-------------+--------------------------+-------------+--------------------+
+|       1 | title1      | This is content of note1 | Created     | 2018-06-29         |
+|       2 | title-again | This is some content     | Created     | 2018-06-29         |
++---------+-------------+--------------------------+-------------+--------------------+
+
+Q - Fetch all the Categories created after the particular Date.
+select * from category where category_creation_date > '2018-06-28';
+
++-------------+---------------+------------------------------------+------------------------+------------------+
+| category_id | category_name | category_descr                     | category_creation_date | category_creator |
++-------------+---------------+------------------------------------+------------------------+------------------+
+|           1 | Updates       | this contains updates for user     | 2018-06-29             | Garvit           |
+|           2 | Miscellaneous | this contains miscellaneous things | 2018-06-29             | Garvit           |
+|           3 | Miscellaneous | this contains miscellaneous things | 2018-07-01             | Someone          |
++-------------+---------------+------------------------------------+------------------------+------------------+
+
+Q - Fetch all the Note ID from UserNote table for a given User.
+select note_id from user_note where user_id=1;
+
++---------+
+| note_id |
++---------+
+|       1 |
+|       2 |
++---------+
+
+Q - Write Update query to modify particular Note for the given note Id.
+update note set note_content="This is updated note", note_status="updated" where note_id=1;
+
+Q - Fetch all the Notes from the Note table by a particular User.
+select * from note where note_id in (select note_id from user_note where user_id=1);
+
++---------+-------------+----------------------+-------------+--------------------+
+| note_id | note_title  | note_content         | note_status | note_creation_date |
++---------+-------------+----------------------+-------------+--------------------+
+|       1 | title1      | This is updated note | updated     | 2018-06-29         |
+|       2 | title-again | This is some content | Created     | 2018-06-29         |
++---------+-------------+----------------------+-------------+--------------------+
+
+Q - Fetch all the Notes from the Note table for a particular Category.
+select * from note where note_id in (select note_id from note_category where category_id=2);
+
++---------+-------------+----------------------+-------------+--------------------+
+| note_id | note_title  | note_content         | note_status | note_creation_date |
++---------+-------------+----------------------+-------------+--------------------+
+|       2 | title-again | This is some content | Created     | 2018-06-29         |
++---------+-------------+----------------------+-------------+--------------------+
+
+Q - Fetch all the reminder details for a given note id.
+select * from reminder where reminder_id in (select reminder_id from note_reminder where note_id=1);
+
++-------------+---------------+--------------------+---------------+------------------------+------------------+
+| reminder_id | reminder_name | reminder_descr     | reminder_type | reminder_creation_date | reminder_creator |
++-------------+---------------+--------------------+---------------+------------------------+------------------+
+|           1 | reminder-1    | remind me everyday | everyday      | 2018-06-29             | Garvit           |
++-------------+---------------+--------------------+---------------+------------------------+------------------+
+
+Q - Fetch the reminder details for a given reminder id.
+select * from reminder where reminder_id=2;
+
++-------------+---------------+---------------------+---------------+------------------------+------------------+
+| reminder_id | reminder_name | reminder_descr      | reminder_type | reminder_creation_date | reminder_creator |
++-------------+---------------+---------------------+---------------+------------------------+------------------+
+|           2 | reminder-2    | remind me everyweek | everyweek     | 2018-06-29             | Garvit           |
++-------------+---------------+---------------------+---------------+------------------------+------------------+
+
+Q - Write a query to create a new Note from particular User (Use Note and UserNote tables - insert statement).
+insert into note values(4,"new note","content of new note","created","2018-07-02");
+insert into user_note values(4,3);
+
+Q - Write a query to create a new Note from particular User to particular Category(Use Note and NoteCategory tables - insert statement)
+insert into note values(5,"note - 5","content of note-5","created","2018-06-02");
+insert into note_category values(5,3);
+
+Q - Write a query to set a reminder for a particular note (Use Reminder and NoteReminder tables - insert statement)
+insert into reminder values(4,"reminder-1","remind me everyday","everyday","2018-07-02","newuser");
+insert into note_reminder values(4,4);
+
+Q - Write a query to delete particular Note added by a User(Note and UserNote tables - delete statement)
+delete from user_note where note_id=4;
+delete from note where note_id=4;
+delete from note_reminder where note_id=4;
+delete from note where note_id=4;
+
+Q - Write a query to delete particular Note from particular Category(Note and NoteCategory tables - delete statement)
+delete from note_category where note_id=3 and category_id=3;
+delete from user_note where note_id=3;
+delete from note_reminder where note_id=3;
+delete from note where note_id=3;
+
+Q - Create a trigger to delete all matching records from UserNote, NoteReminder and NoteCategory table when :
+    1. A particular note is deleted from Note table (all the matching records from UserNote, NoteReminder and NoteCategory should be removed automatically) 
+    2. A particular user is deleted from User table (all the matching notes should be removed automatically)
+
+
+delimiter//
+create trigger deleteNote_values
+Before delete on note
+for each row
+Begin
+
+delete from note_category where note_id= old.note_id;
+delete from user_note where note_id= old.note_id;
+delete from note_reminder where note_id= old.note_id;
+
+end;//
+delimiter;
+
+delimiter//
+create trigger deleteUser_Notes
+Before delete on user 
+for each row
+Begin
+
+delete from user_note where user_id= old.user_id;
+
+end;//
+delimiter;
